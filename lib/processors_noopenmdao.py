@@ -5,6 +5,8 @@ import pylab
 import os
 import sys
 
+class GetPulseExeption(Exception):
+  pass
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -121,6 +123,27 @@ class findFaceGetPulse(object):
         self.gray = cv2.equalizeHist(cv2.cvtColor(self.frame_in,
                                                   cv2.COLOR_BGR2GRAY))
         col = (100, 255, 100)
+        detected = list(self.face_cascade.detectMultiScale(self.gray,
+                                                               scaleFactor=1.3,
+                                                               minNeighbors=4,
+                                                               minSize=(
+                                                                   50, 50),
+                                                               flags=cv2.CASCADE_SCALE_IMAGE))
+
+        if len(detected) > 0:
+            detected.sort(key=lambda a: a[-1] * a[-2])
+
+            if self.shift(detected[-1]) > 10:
+                self.face_rect = detected[-1]
+
+        x, y, w, h = self.face_rect
+        self.draw_rect(self.face_rect)
+        #cv2.putText(self.frame_out, "",
+        #           (x, y), cv2.FONT_HERSHEY_PLAIN, 1.5, col)
+        forehead1 = self.get_subface_coord(0.5, 0.18, 0.25, 0.15)
+        x, y, w, h = forehead1
+        #cv2.putText(self.frame_out, "",
+        #           (x, y), cv2.FONT_HERSHEY_PLAIN, 1.5, col)
         if self.find_faces:
             cv2.putText(
                 self.frame_out, "Press 'C' to change camera (current: %s)" % str(
@@ -132,28 +155,10 @@ class findFaceGetPulse(object):
             cv2.putText(self.frame_out, "Press 'Esc' to quit",
                        (10, 75), cv2.FONT_HERSHEY_PLAIN, 1.25, col)
             self.data_buffer, self.times, self.trained = [], [], False
-            detected = list(self.face_cascade.detectMultiScale(self.gray,
-                                                               scaleFactor=1.3,
-                                                               minNeighbors=4,
-                                                               minSize=(
-                                                                   50, 50),
-                                                               flags=cv2.CASCADE_SCALE_IMAGE))
-
-            if len(detected) > 0:
-                detected.sort(key=lambda a: a[-1] * a[-2])
-
-                if self.shift(detected[-1]) > 10:
-                    self.face_rect = detected[-1]
             forehead1 = self.get_subface_coord(0.5, 0.18, 0.25, 0.15)
             self.draw_rect(self.face_rect, col=(255, 0, 0))
-            x, y, w, h = self.face_rect
-            cv2.putText(self.frame_out, "Face",
-                       (x, y), cv2.FONT_HERSHEY_PLAIN, 1.5, col)
-            self.draw_rect(forehead1)
-            x, y, w, h = forehead1
-            cv2.putText(self.frame_out, "Forehead",
-                       (x, y), cv2.FONT_HERSHEY_PLAIN, 1.5, col)
             return
+
         if set(self.face_rect) == set([1, 1, 2, 2]):
             return
         cv2.putText(
@@ -204,7 +209,11 @@ class findFaceGetPulse(object):
             pfreq = freqs[idx]
             self.freqs = pfreq
             self.fft = pruned
-            idx2 = np.argmax(pruned)
+            try:
+              idx2 = np.argmax(pruned)
+            except:
+              raise GetPulseExeption
+
 
             t = (np.sin(phase[idx2]) + 1.) / 2.
             t = 0.9 * t + 0.1

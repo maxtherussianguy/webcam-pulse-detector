@@ -1,5 +1,5 @@
 from lib.device import Camera
-from lib.processors_noopenmdao import findFaceGetPulse
+from lib.processors_noopenmdao import findFaceGetPulse, GetPulseExeption
 from lib.interface import plotXY, imshow, waitKey, destroyWindow
 from cv2 import moveWindow
 import argparse
@@ -50,6 +50,7 @@ class getPulseApp(object):
 
         self.cameras = []
         self.selected_cam = 0
+        #XXX MAYBE REWORK THIS
         for i in range(3):
             camera = Camera(camera=i)  # first camera by default
             if camera.valid or not len(self.cameras):
@@ -178,7 +179,10 @@ class getPulseApp(object):
         # set current image frame to the processor's input
         self.processor.frame_in = frame
         # process the image frame to perform all needed analysis
-        self.processor.run(self.selected_cam)
+        try:
+          self.processor.run(self.selected_cam)
+        except GetPulseExeption:
+          print("could not calculate")
         # collect the output frame for display
         output_frame = self.processor.frame_out
 
