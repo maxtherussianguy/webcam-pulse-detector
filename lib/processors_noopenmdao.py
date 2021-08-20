@@ -203,13 +203,13 @@ class findFaceGetPulse(object):
             freqs = 60. * self.freqs
             idx = np.where((freqs > 50) & (freqs < 180))
 
-            pruned = self.fft[idx]
-            phase = phase[idx]
-
-            pfreq = freqs[idx]
-            self.freqs = pfreq
-            self.fft = pruned
             try:
+              pruned = self.fft[idx]
+              phase = phase[idx]
+
+              pfreq = freqs[idx]
+              self.freqs = pfreq
+              self.fft = pruned
               idx2 = np.argmax(pruned)
             except:
               raise GetPulseExeption
