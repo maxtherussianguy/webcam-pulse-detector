@@ -223,12 +223,22 @@ class findFaceGetPulse(object):
             self.bpm = self.freqs[idx2]
             self.idx += 1
 
-            x, y, w, h = self.get_subface_coord(0.5, 0.18, 0.25, 0.15)
-            r = alpha * self.frame_in[y:y + h, x:x + w, 0]
-            g = alpha * \
-                self.frame_in[y:y + h, x:x + w, 1] + \
-                beta * self.gray[y:y + h, x:x + w]
-            b = alpha * self.frame_in[y:y + h, x:x + w, 2]
+            #x, y, w, h = self.get_subface_coord(0.5, 0.18, 0.25, 0.15)
+            x = y = 0
+            h, w, _ = self.frame_in.shape
+
+            #r = alpha * self.frame_in[y:y + h, x:x + w, 0]
+            #g = alpha * self.frame_in[y:y + h, x:x + w, 1] + beta * self.gray[y:y + h, x:x + w]
+            #b = alpha * self.frame_in[y:y + h, x:x + w, 2]
+
+            RED_MULTIPLIER_PULSER = 1
+            BLUE_MULTIPLIER_PULSER = 1
+            GREEN_MULTIPLIER_PULSER = 1
+            # rework
+            r = alpha * self.frame_in[y:y + h, x:x + w, 0] + RED_MULTIPLIER_PULSER * (beta * self.gray[y:y + h, x:x + w])
+            g = alpha * self.frame_in[y:y + h, x:x + w, 1] + GREEN_MULTIPLIER_PULSER * (beta * self.gray[y:y + h, x:x + w])
+            b = alpha * self.frame_in[y:y + h, x:x + w, 2] + BLUE_MULTIPLIER_PULSER * (beta * self.gray[y:y + h, x:x + w])
+
             self.frame_out[y:y + h, x:x + w] = cv2.merge([r,
                                                           g,
                                                           b])
