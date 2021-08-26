@@ -80,6 +80,9 @@ class findFaceGetPulse(object):
         x, y, w, h = rect
         cv2.rectangle(self.frame_out, (x, y), (x + w, y + h), col, 1)
 
+    def get_phrase_writer(self):
+      return self.phrase_writer
+
     def get_subface_coord(self, fh_x, fh_y, fh_w, fh_h):
         x, y, w, h = self.face_rect
         return [int(x + w * fh_x - (w * fh_w / 2.0)),

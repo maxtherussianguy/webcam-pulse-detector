@@ -81,7 +81,9 @@ class getPulseApp(object):
         self.key_controls = {"s": self.toggle_search,
                              "d": self.toggle_display_plot,
                              "c": self.toggle_cam,
-                             "f": self.write_csv}
+                             "f": self.write_csv,
+                             "g": self.write_text}
+                        
 
     def toggle_cam(self):
         if len(self.cameras) > 1:
@@ -90,6 +92,12 @@ class getPulseApp(object):
             destroyWindow(self.plot_title)
             self.selected_cam += 1
             self.selected_cam = self.selected_cam % len(self.cameras)
+
+    def write_text(self):
+      writer = self.processor.get_phrase_writer()
+      writer.update_rand()
+
+      
 
     def write_csv(self):
         """
