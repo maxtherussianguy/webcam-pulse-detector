@@ -4,6 +4,12 @@ import cv2
 import pylab
 import os
 import sys
+from lib.phrases import PhraseWriter, PHRASES
+
+RED_MULTIPLIER_PULSER = 1
+BLUE_MULTIPLIER_PULSER = 0
+GREEN_MULTIPLIER_PULSER = 1
+
 
 class GetPulseExeption(Exception):
   pass
@@ -52,6 +58,8 @@ class findFaceGetPulse(object):
 
         self.idx = 1
         self.find_faces = True
+        self.phrase_writer = PhraseWriter((100,100), color=(255,255,255))
+        self.phrase_writer.set_phrase("phrase_1")
 
     def find_faces_toggle(self):
         self.find_faces = not self.find_faces
@@ -137,7 +145,6 @@ class findFaceGetPulse(object):
                 self.face_rect = detected[-1]
 
         x, y, w, h = self.face_rect
-        self.draw_rect(self.face_rect)
         #cv2.putText(self.frame_out, "",
         #           (x, y), cv2.FONT_HERSHEY_PLAIN, 1.5, col)
         forehead1 = self.get_subface_coord(0.5, 0.18, 0.25, 0.15)
@@ -231,17 +238,18 @@ class findFaceGetPulse(object):
             #g = alpha * self.frame_in[y:y + h, x:x + w, 1] + beta * self.gray[y:y + h, x:x + w]
             #b = alpha * self.frame_in[y:y + h, x:x + w, 2]
 
-            RED_MULTIPLIER_PULSER = 1
-            BLUE_MULTIPLIER_PULSER = 1
-            GREEN_MULTIPLIER_PULSER = 1
             # rework
-            r = alpha * self.frame_in[y:y + h, x:x + w, 0] + RED_MULTIPLIER_PULSER * (beta * self.gray[y:y + h, x:x + w])
+            r = alpha * self.frame_in[y:y + h, x:x + w, 0] + BLUE_MULTIPLIER_PULSER * (beta * self.gray[y:y + h, x:x + w])
             g = alpha * self.frame_in[y:y + h, x:x + w, 1] + GREEN_MULTIPLIER_PULSER * (beta * self.gray[y:y + h, x:x + w])
-            b = alpha * self.frame_in[y:y + h, x:x + w, 2] + BLUE_MULTIPLIER_PULSER * (beta * self.gray[y:y + h, x:x + w])
+            b = alpha * self.frame_in[y:y + h, x:x + w, 2] + RED_MULTIPLIER_PULSER * (beta * self.gray[y:y + h, x:x + w])
 
             self.frame_out[y:y + h, x:x + w] = cv2.merge([r,
                                                           g,
                                                           b])
+            self.draw_rect(self.face_rect)
+
+            self.frame_out = self.phrase_writer.run(self.frame_out)
+
             x1, y1, w1, h1 = self.face_rect
             self.slices = [np.copy(self.frame_out[y1:y1 + h1, x1:x1 + w1, 1])]
             col = (100, 255, 100)
